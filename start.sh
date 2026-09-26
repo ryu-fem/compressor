@@ -17,7 +17,12 @@ telegram-bot-api \
 TGAPI_PID=$!
 
 # استنى شوية لحد ما السيرفر يبقى جاهز يستقبل طلبات
-sleep 3
+sleep 8
+
+echo "===== DEBUG: raw response from local telegram-bot-api ====="
+curl -sS "http://127.0.0.1:8081/bot${BOT_TOKEN}/getMe" || echo "curl failed to reach local server"
+echo ""
+echo "============================================================"
 
 export TELEGRAM_API_BASE_URL="http://127.0.0.1:8081/bot"
 export TELEGRAM_API_BASE_FILE_URL="http://127.0.0.1:8081/file/bot"
