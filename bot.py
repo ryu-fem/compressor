@@ -44,7 +44,12 @@ QUALITY_PRESETS = {
     "prepress": "/prepress",
 }
 
-MAX_FILE_SIZE_MB = 50  # حد تليجرام للبوتات العادية هو 20MB للتنزيل، خليها مرنة لو عندك API خاص
+MAX_FILE_SIZE_MB = int(os.environ.get("MAX_FILE_SIZE_MB", "50"))
+
+# إعدادات Local Bot API Server (اختيارية) — لازمة لو عايز تدعم ملفات أكبر من 20MB
+TELEGRAM_API_BASE_URL = os.environ.get("TELEGRAM_API_BASE_URL")  # مثال: http://telegram-bot-api:8081/bot
+TELEGRAM_API_BASE_FILE_URL = os.environ.get("TELEGRAM_API_BASE_FILE_URL")  # مثال: http://telegram-bot-api:8081/file/bot
+TELEGRAM_LOCAL_MODE = os.environ.get("TELEGRAM_LOCAL_MODE", "0") == "1"
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -148,7 +153,16 @@ def main():
             "لازم تحط توكن البوت الأول (متغير بيئة BOT_TOKEN أو في الكود مباشرة)."
         )
 
-    app = ApplicationBuilder().token(BOT_TOKEN).build()
+    app_builder = ApplicationBuilder().token(BOT_TOKEN)
+
+    if TELEGRAM_API_BASE_URL:
+        app_builder = app_builder.base_url(TELEGRAM_API_BASE_URL)
+    if TELEGRAM_API_BASE_FILE_URL:
+        app_builder = app_builder.base_file_url(TELEGRAM_API_BASE_FILE_URL)
+    if TELEGRAM_LOCAL_MODE:
+        app_builder = app_builder.local_mode(True)
+
+    app = app_builder.build()
 
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("quality", set_quality))
